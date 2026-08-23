@@ -1,47 +1,17 @@
 const express = require("express");
 
 const {
-    createVehicle,
-    getVehicles,
-    getVehicleById,
-    updateVehicle,
-    deleteVehicle
+  getVehicles,
+  createVehicle,
+  deleteVehicle,
 } = require("../controllers/vehicleController");
-
-const authMiddleware = require("../middleware/authMiddleware");
-const adminMiddleware = require("../middleware/adminMiddleware");
 
 const router = express.Router();
 
-router.post(
-    "/",
-    authMiddleware,
-    adminMiddleware,
-    createVehicle
-);
+router.get("/", getVehicles);
 
-router.get(
-    "/",
-    authMiddleware,
-    getVehicles
-);
+router.post("/", createVehicle);
 
-router.get(
-    "/:id",
-    authMiddleware,
-    getVehicleById
-);
-router.put(
-    "/:id",
-    authMiddleware,
-    adminMiddleware,
-    updateVehicle
-);
-router.delete(
-    "/:id",
-    authMiddleware,
-    adminMiddleware,
-    deleteVehicle
-);
+router.delete("/:id", deleteVehicle);
 
 module.exports = router;

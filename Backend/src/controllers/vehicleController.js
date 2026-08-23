@@ -1,161 +1,103 @@
 const Vehicle = require("../models/Vehicle");
 
-const createVehicle = async (req, res) => {
-    try {
-        const { make, model, category, price, quantity } = req.body;
-
-        if (
-            !make ||
-            !model ||
-            !category ||
-            price === undefined ||
-            quantity === undefined
-        ) {
-            return res.status(400).json({
-                message: "All vehicle fields are required"
-            });
-        }
-
-        const vehicle = await Vehicle.create({
-            make,
-            model,
-            category,
-            price,
-            quantity
-        });
-
-        res.status(201).json(vehicle);
-
-    } catch (error) {
-        res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
-    }
-};
-
-
+// Get all vehicles
 const getVehicles = async (req, res) => {
-    try {
-        const filter = {};
+  try {
+    const vehicles = await Vehicle.find().sort({
+      createdAt: -1,
+    });
 
-        // Filter by make
-        if (req.query.make) {
-            filter.make = req.query.make;
-        }
+    res.status(200).json(vehicles);
+  } catch (error) {
+    console.error(error);
 
-        // Filter by model
-        if (req.query.model) {
-            filter.model = req.query.model;
-        }
-
-        // Filter by category
-        if (req.query.category) {
-            filter.category = req.query.category;
-        }
-
-        // Filter by minimum and maximum price
-        if (req.query.minPrice || req.query.maxPrice) {
-            filter.price = {};
-
-            if (req.query.minPrice) {
-                filter.price.$gte = Number(req.query.minPrice);
-            }
-
-            if (req.query.maxPrice) {
-                filter.price.$lte = Number(req.query.maxPrice);
-            }
-        }
-
-        const vehicles = await Vehicle.find(filter);
-
-        res.status(200).json(vehicles);
-
-    } catch (error) {
-        res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
-    }
+    res.status(500).json({
+      message: "Failed to fetch vehicles",
+    });
+  }
 };
 
+// Add vehicle
+const createVehicle = async (req, res) => {
+  try {
+    const {
+      brand,
+      model,
+      year,
+      price,
+      fuelType,
+      transmission,
+      color,
+      status,
+    } = req.body;
 
-const getVehicleById = async (req, res) => {
-    try {
-        const vehicle = await Vehicle.findById(req.params.id);
-
-        if (!vehicle) {
-            return res.status(404).json({
-                message: "Vehicle not found"
-            });
-        }
-
-        res.status(200).json(vehicle);
-
-    } catch (error) {
-        res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
+    if (
+      !brand ||
+      !model ||
+      !year ||
+      !price ||
+      !fuelType ||
+      !transmission ||
+      !color
+    ) {
+      return res.status(400).json({
+        message: "Please fill all required fields",
+      });
     }
+
+    const vehicle = await Vehicle.create({
+      brand,
+      model,
+      year,
+      price,
+      fuelType,
+      transmission,
+      color,
+      status: status || "Available",
+    });
+
+    res.status(201).json({
+      message: "Vehicle added successfully",
+      vehicle,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to add vehicle",
+    });
+  }
 };
 
-
-const updateVehicle = async (req, res) => {
-    try {
-        const vehicle = await Vehicle.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true
-            }
-        );
-
-        if (!vehicle) {
-            return res.status(404).json({
-                message: "Vehicle not found"
-            });
-        }
-
-        res.status(200).json(vehicle);
-
-    } catch (error) {
-        res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
-    }
-};
-
-
+// Delete vehicle
 const deleteVehicle = async (req, res) => {
-    try {
-        const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
+  try {
+    const vehicle = await Vehicle.findById(
+      req.params.id
+    );
 
-        if (!vehicle) {
-            return res.status(404).json({
-                message: "Vehicle not found"
-            });
-        }
-
-        res.status(200).json({
-            message: "Vehicle deleted successfully"
-        });
-
-    } catch (error) {
-        res.status(500).json({
-            message: "Server error",
-            error: error.message
-        });
+    if (!vehicle) {
+      return res.status(404).json({
+        message: "Vehicle not found",
+      });
     }
-};
 
+    await Vehicle.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      message: "Vehicle deleted successfully",
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: "Failed to delete vehicle",
+    });
+  }
+};
 
 module.exports = {
-    createVehicle,
-    getVehicles,
-    getVehicleById,
-    updateVehicle,
-    deleteVehicle
+  getVehicles,
+  createVehicle,
+  deleteVehicle,
 };
