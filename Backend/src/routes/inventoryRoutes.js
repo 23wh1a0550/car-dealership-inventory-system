@@ -9,7 +9,7 @@ const {
 const authMiddleware = require("../middleware/authMiddleware");
 
 router.post(
-    "/vehicles/:id/purchase",
+    "/:id/purchase",
     authMiddleware,
     purchaseVehicle
 );
