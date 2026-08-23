@@ -4,6 +4,7 @@ const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const express = require("express");
+
 const authMiddleware = require("../src/middleware/authMiddleware");
 
 const app = express();
