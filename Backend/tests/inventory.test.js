@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+const Purchase = require("../src/models/Purchase");
 const request = require("supertest");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
@@ -135,5 +135,54 @@ describe("POST /api/vehicles/:id/purchase", () => {
 
         await Vehicle.findByIdAndDelete(vehicle._id);
     });
+    test("should create purchase history after successful purchase", async () => {
+
+    const userId = new mongoose.Types.ObjectId();
+
+    const token = jwt.sign(
+        {
+            id: userId,
+            role: "user"
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: "1h"
+        }
+    );
+
+    const vehicle = await Vehicle.create({
+        make: "Toyota",
+        model: "Corolla",
+        category: "Sedan",
+        price: 25000,
+        quantity: 5
+    });
+
+    const response = await request(app)
+        .post(`/api/vehicles/${vehicle._id}/purchase`)
+        .set("Authorization", `Bearer ${token}`)
+        .send({
+            quantity: 2
+        });
+
+    expect(response.statusCode).toBe(200);
+
+    const purchase = await Purchase.findOne({
+        user: userId,
+        vehicle: vehicle._id
+    });
+
+    expect(purchase).not.toBeNull();
+
+    expect(purchase.quantity).toBe(2);
+
+    expect(purchase.totalPrice).toBe(50000);
+
+    await Purchase.deleteMany({
+        user: userId
+    });
+
+    await Vehicle.findByIdAndDelete(vehicle._id);
+});
 
 });
