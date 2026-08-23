@@ -170,3 +170,43 @@ describe("PUT /api/vehicles/:id", () => {
     });
 
 });
+describe("DELETE /api/vehicles/:id", () => {
+
+    test("should delete a vehicle as admin", async () => {
+
+        const token = jwt.sign(
+            {
+                id: new mongoose.Types.ObjectId(),
+                role: "admin"
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h"
+            }
+        );
+
+        const vehicle = await Vehicle.create({
+            make: "BMW",
+            model: "X5",
+            category: "SUV",
+            price: 60000,
+            quantity: 2
+        });
+
+        const response = await request(app)
+            .delete(`/api/vehicles/${vehicle._id}`)
+            .set("Authorization", `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(200);
+
+        expect(response.body).toHaveProperty(
+            "message",
+            "Vehicle deleted successfully"
+        );
+
+        const deletedVehicle = await Vehicle.findById(vehicle._id);
+
+        expect(deletedVehicle).toBeNull();
+    });
+
+});
