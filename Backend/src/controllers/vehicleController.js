@@ -4,7 +4,13 @@ const createVehicle = async (req, res) => {
     try {
         const { make, model, category, price, quantity } = req.body;
 
-        if (!make || !model || !category || price === undefined || quantity === undefined) {
+        if (
+            !make ||
+            !model ||
+            !category ||
+            price === undefined ||
+            quantity === undefined
+        ) {
             return res.status(400).json({
                 message: "All vehicle fields are required"
             });
@@ -27,9 +33,41 @@ const createVehicle = async (req, res) => {
         });
     }
 };
+
+
 const getVehicles = async (req, res) => {
     try {
-        const vehicles = await Vehicle.find();
+        const filter = {};
+
+        // Filter by make
+        if (req.query.make) {
+            filter.make = req.query.make;
+        }
+
+        // Filter by model
+        if (req.query.model) {
+            filter.model = req.query.model;
+        }
+
+        // Filter by category
+        if (req.query.category) {
+            filter.category = req.query.category;
+        }
+
+        // Filter by minimum and maximum price
+        if (req.query.minPrice || req.query.maxPrice) {
+            filter.price = {};
+
+            if (req.query.minPrice) {
+                filter.price.$gte = Number(req.query.minPrice);
+            }
+
+            if (req.query.maxPrice) {
+                filter.price.$lte = Number(req.query.maxPrice);
+            }
+        }
+
+        const vehicles = await Vehicle.find(filter);
 
         res.status(200).json(vehicles);
 
@@ -40,6 +78,8 @@ const getVehicles = async (req, res) => {
         });
     }
 };
+
+
 const getVehicleById = async (req, res) => {
     try {
         const vehicle = await Vehicle.findById(req.params.id);
@@ -59,6 +99,8 @@ const getVehicleById = async (req, res) => {
         });
     }
 };
+
+
 const updateVehicle = async (req, res) => {
     try {
         const vehicle = await Vehicle.findByIdAndUpdate(
@@ -85,6 +127,8 @@ const updateVehicle = async (req, res) => {
         });
     }
 };
+
+
 const deleteVehicle = async (req, res) => {
     try {
         const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
@@ -106,6 +150,8 @@ const deleteVehicle = async (req, res) => {
         });
     }
 };
+
+
 module.exports = {
     createVehicle,
     getVehicles,
