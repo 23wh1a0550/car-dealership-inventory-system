@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const {
-    getMyPurchases,
+    getPurchaseHistory,
     getAllPurchases
 } = require("../controllers/purchaseController");
 
@@ -11,15 +11,17 @@ const authMiddleware = require("../middleware/authMiddleware");
 const adminMiddleware = require("../middleware/adminMiddleware");
 
 
-// Logged-in user's purchase history
+// GET /api/purchases
+// Normal user purchase history
 router.get(
     "/",
     authMiddleware,
-    getMyPurchases
+    getPurchaseHistory
 );
 
 
-// Admin purchase history
+// GET /api/purchases/all
+// Admin only - all purchase history
 router.get(
     "/all",
     authMiddleware,

@@ -141,3 +141,68 @@ describe("GET /api/purchases/all", () => {
     });
 
 });
+describe("GET /api/purchases - Filter", () => {
+
+    test("should filter purchase history by vehicle", async () => {
+
+        const userId = new mongoose.Types.ObjectId();
+
+        const token = jwt.sign(
+            {
+                id: userId,
+                role: "user"
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h"
+            }
+        );
+
+        const vehicle1 = await Vehicle.create({
+            make: "HistoryTestCar",
+            model: "FilterModel1",
+            category: "Sedan",
+            price: 25000,
+            quantity: 5
+        });
+
+        const vehicle2 = await Vehicle.create({
+            make: "HistoryTestCar",
+            model: "FilterModel2",
+            category: "SUV",
+            price: 35000,
+            quantity: 5
+        });
+
+        await Purchase.create({
+            user: userId,
+            vehicle: vehicle1._id,
+            quantity: 2,
+            totalPrice: 50000
+        });
+
+        await Purchase.create({
+            user: userId,
+            vehicle: vehicle2._id,
+            quantity: 1,
+            totalPrice: 35000
+        });
+
+        const response = await request(app)
+            .get(`/api/purchases?vehicleId=${vehicle1._id}`)
+            .set("Authorization", `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(200);
+
+        expect(Array.isArray(response.body)).toBe(true);
+
+        expect(response.body.length).toBeGreaterThan(0);
+
+        response.body.forEach(purchase => {
+            expect(
+                purchase.vehicle._id || purchase.vehicle
+            ).toBe(vehicle1._id.toString());
+        });
+    });
+
+});

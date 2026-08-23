@@ -65,6 +65,53 @@ const purchaseVehicle = async (req, res) => {
     }
 };
 
+
+const getPurchaseHistory = async (req, res) => {
+    try {
+        const filter = {
+            user: req.user.id
+        };
+
+        // Filter by vehicle
+        if (req.query.vehicleId) {
+            filter.vehicle = req.query.vehicleId;
+        }
+
+        const purchases = await Purchase.find(filter)
+            .populate("vehicle")
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json(purchases);
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
+
+const getAllPurchases = async (req, res) => {
+    try {
+        const purchases = await Purchase.find()
+            .populate("vehicle")
+            .populate("user")
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json(purchases);
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
+
+
 module.exports = {
-    purchaseVehicle
+    purchaseVehicle,
+    getPurchaseHistory,
+    getAllPurchases
 };

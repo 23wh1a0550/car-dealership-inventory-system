@@ -10,11 +10,8 @@ const app = express();
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-
 app.use("/api/vehicles", vehicleRoutes);
-
 app.use("/api/vehicles", inventoryRoutes);
-
 app.use("/api/purchases", purchaseRoutes);
 
 module.exports = app;
