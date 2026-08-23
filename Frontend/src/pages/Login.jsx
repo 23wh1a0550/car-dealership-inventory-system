@@ -15,9 +15,11 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     setError("");
 
-    if (!email || !password) {
+    // Validate fields
+    if (!email.trim() || !password.trim()) {
       setError("Please enter your email and password");
       return;
     }
@@ -25,19 +27,62 @@ const Login = () => {
     try {
       setLoading(true);
 
-      await login(email, password);
+      // Login through AuthContext
+      const response = await login(
+        email.trim(),
+        password
+      );
 
-      // IMPORTANT:
-      // After successful login, go to Dashboard
-      navigate("/dashboard");
+      console.log("Login response:", response);
+
+      // Make sure user information exists
+      if (!response || !response.user) {
+        setError("Login successful, but user information is missing.");
+        return;
+      }
+
+      // Get user's role
+      const role = response.user.role;
+
+      console.log("Logged in user:", response.user);
+      console.log("User role:", role);
+
+      // ==============================
+      // ADMIN
+      // ==============================
+      if (role === "admin") {
+        navigate("/admin/dashboard", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      // ==============================
+      // NORMAL USER
+      // ==============================
+      if (role === "user") {
+        navigate("/dashboard", {
+          replace: true,
+        });
+
+        return;
+      }
+
+      // ==============================
+      // UNKNOWN ROLE
+      // ==============================
+      setError(
+        "Your account does not have a valid role. Please contact the administrator."
+      );
 
     } catch (err) {
       console.error("Login error:", err);
 
       setError(
         err.response?.data?.message ||
-        err.response?.data?.error ||
-        "Invalid email or password"
+          err.response?.data?.error ||
+          "Invalid email or password"
       );
     } finally {
       setLoading(false);
@@ -46,56 +91,99 @@ const Login = () => {
 
   return (
     <div className="login-page">
+
       <div className="login-container">
 
-        {/* LEFT SIDE */}
+        {/* =========================================
+            LEFT SIDE
+        ========================================= */}
+
         <div className="login-left">
 
           <div className="brand">
-            <div className="brand-icon">◆</div>
-            <h2>AutoHub</h2>
+
+            <div className="brand-icon">
+              ◆
+            </div>
+
+            <h2>
+              AutoHub
+            </h2>
+
           </div>
 
           <div className="welcome-content">
-            <h1>Welcome Back!</h1>
+
+            <h1>
+              Welcome Back!
+            </h1>
 
             <p>
-              Sign in to manage your account and explore
-              everything AutoHub has to offer.
+              Sign in to manage your account and
+              explore everything AutoHub has to offer.
             </p>
 
             <div className="features">
 
               <div className="feature">
-                <span>✓</span>
-                <p>Manage your vehicles easily</p>
+
+                <span>
+                  ✓
+                </span>
+
+                <p>
+                  Manage your vehicles easily
+                </p>
+
               </div>
 
               <div className="feature">
-                <span>✓</span>
-                <p>Access your account securely</p>
+
+                <span>
+                  ✓
+                </span>
+
+                <p>
+                  Access your account securely
+                </p>
+
               </div>
 
               <div className="feature">
-                <span>✓</span>
-                <p>Fast and simple experience</p>
+
+                <span>
+                  ✓
+                </span>
+
+                <p>
+                  Fast and simple experience
+                </p>
+
               </div>
 
             </div>
+
           </div>
 
         </div>
 
-        {/* RIGHT SIDE */}
+        {/* =========================================
+            RIGHT SIDE
+        ========================================= */}
+
         <div className="login-right">
 
           <div className="login-form-container">
 
-            <h1>Login</h1>
+            <h1>
+              Login
+            </h1>
 
             <p className="subtitle">
               Enter your details to continue
             </p>
+
+            {/* ERROR */}
 
             {error && (
               <div className="error-message">
@@ -103,9 +191,14 @@ const Login = () => {
               </div>
             )}
 
+            {/* =====================================
+                LOGIN FORM
+            ===================================== */}
+
             <form onSubmit={handleLogin}>
 
               {/* EMAIL */}
+
               <div className="form-group">
 
                 <label htmlFor="email">
@@ -114,16 +207,21 @@ const Login = () => {
 
                 <input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Enter your email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) =>
+                    setEmail(e.target.value)
+                  }
+                  autoComplete="email"
                   required
                 />
 
               </div>
 
               {/* PASSWORD */}
+
               <div className="form-group">
 
                 <label htmlFor="password">
@@ -132,16 +230,23 @@ const Login = () => {
 
                 <input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) =>
+                    setPassword(e.target.value)
+                  }
+                  autoComplete="current-password"
                   required
                 />
 
               </div>
 
-              {/* REMEMBER + FORGOT */}
+              {/* =================================
+                  REMEMBER ME + FORGOT PASSWORD
+              ================================= */}
+
               <div className="login-options">
 
                 <label className="remember">
@@ -150,11 +255,15 @@ const Login = () => {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) =>
-                      setRememberMe(e.target.checked)
+                      setRememberMe(
+                        e.target.checked
+                      )
                     }
                   />
 
-                  <span>Remember me</span>
+                  <span>
+                    Remember me
+                  </span>
 
                 </label>
 
@@ -172,29 +281,42 @@ const Login = () => {
 
               </div>
 
-              {/* LOGIN BUTTON */}
+              {/* =================================
+                  LOGIN BUTTON
+              ================================= */}
+
               <button
                 type="submit"
                 className="login-button"
                 disabled={loading}
               >
-                {loading ? "Logging in..." : "Login"}
+                {loading
+                  ? "Logging in..."
+                  : "Login"}
               </button>
 
             </form>
 
-            {/* OR */}
+            {/* =================================
+                OR DIVIDER
+            ================================= */}
+
             <div className="or-divider">
 
               <span></span>
 
-              <p>OR</p>
+              <p>
+                OR
+              </p>
 
               <span></span>
 
             </div>
 
-            {/* REGISTER */}
+            {/* =================================
+                REGISTER
+            ================================= */}
+
             <p className="register-text">
 
               Don't have an account?{" "}
@@ -210,6 +332,7 @@ const Login = () => {
         </div>
 
       </div>
+
     </div>
   );
 };

@@ -5,9 +5,11 @@ import {
   Routes,
 } from "react-router-dom";
 
-import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
+import AdminDashboard from "./pages/AdminDashboard";
+import UserDashboard from "./pages/UserDashboard";
 
 import Categories from "./pages/Categories";
 import Profile from "./pages/Profile";
@@ -17,6 +19,11 @@ import StockOut from "./pages/StockOut";
 import Vehicles from "./pages/Vehicles";
 
 import { useAuth } from "./context/AuthContext";
+
+
+// ============================================
+// PROTECTED ROUTE
+// ============================================
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -28,34 +35,98 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+
+// ============================================
+// ADMIN ONLY ROUTE
+// ============================================
+
+const AdminRoute = ({ children }) => {
+  const { isAuthenticated, user } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Admin is determined from MongoDB user.role
+  if (user?.role !== "admin") {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
+
+// ============================================
+// APP
+// ============================================
+
 function App() {
   return (
     <BrowserRouter>
+
       <Routes>
+
+        {/* ======================================
+            ROOT
+        ====================================== */}
 
         <Route
           path="/"
           element={<Navigate to="/login" replace />}
         />
 
+
+        {/* ======================================
+            LOGIN
+        ====================================== */}
+
         <Route
           path="/login"
           element={<Login />}
         />
+
+
+        {/* ======================================
+            REGISTER
+        ====================================== */}
 
         <Route
           path="/register"
           element={<Register />}
         />
 
+
+        {/* ======================================
+            USER DASHBOARD
+        ====================================== */}
+
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <UserDashboard />
             </ProtectedRoute>
           }
         />
+
+
+        {/* ======================================
+            ADMIN DASHBOARD
+        ====================================== */}
+
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+
+
+        {/* ======================================
+            VEHICLES
+        ====================================== */}
 
         <Route
           path="/vehicles"
@@ -66,6 +137,11 @@ function App() {
           }
         />
 
+
+        {/* ======================================
+            CATEGORIES
+        ====================================== */}
+
         <Route
           path="/categories"
           element={
@@ -74,6 +150,11 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+
+        {/* ======================================
+            STOCK IN
+        ====================================== */}
 
         <Route
           path="/stock-in"
@@ -84,6 +165,11 @@ function App() {
           }
         />
 
+
+        {/* ======================================
+            STOCK OUT
+        ====================================== */}
+
         <Route
           path="/stock-out"
           element={
@@ -92,6 +178,11 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+
+        {/* ======================================
+            REPORTS
+        ====================================== */}
 
         <Route
           path="/reports"
@@ -102,6 +193,11 @@ function App() {
           }
         />
 
+
+        {/* ======================================
+            PROFILE
+        ====================================== */}
+
         <Route
           path="/profile"
           element={
@@ -111,12 +207,18 @@ function App() {
           }
         />
 
+
+        {/* ======================================
+            UNKNOWN URL
+        ====================================== */}
+
         <Route
           path="*"
-          element={<Navigate to="/dashboard" replace />}
+          element={<Navigate to="/login" replace />}
         />
 
       </Routes>
+
     </BrowserRouter>
   );
 }

@@ -2,30 +2,38 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
+  const { user, logout } = useAuth();
+
   const navigate = useNavigate();
-  const { logout } = useAuth();
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+
+    navigate("/login", {
+      replace: true,
+    });
   };
 
   return (
     <nav className="navbar">
 
-      <div className="navbar-left">
-        <h2>🚗 Car Dealership Inventory</h2>
+      <div className="navbar-brand">
+        🚗 Car Dealership Inventory
       </div>
 
       <div className="navbar-right">
-        <span>👤 Admin</span>
+
+        <span className="navbar-user">
+          👤 {user?.name || "User"}
+        </span>
 
         <button
-          className="logout-btn"
+          className="logout-button"
           onClick={handleLogout}
         >
           Logout
         </button>
+
       </div>
 
     </nav>

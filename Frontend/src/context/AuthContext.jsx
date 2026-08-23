@@ -8,15 +8,24 @@ export const AuthProvider = ({ children }) => {
     localStorage.getItem("token") !== null
   );
 
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
   const login = async (email, password) => {
     const response = await API.post("/auth/login", {
       email,
       password,
     });
 
-    const { token } = response.data;
+    const { token, user } = response.data;
 
     localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
+
+    setUser(user);
     setIsAuthenticated(true);
 
     return response.data;
@@ -24,7 +33,10 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (formData) => {
     try {
-      const response = await API.post("/auth/register", formData);
+      const response = await API.post(
+        "/auth/register",
+        formData
+      );
 
       return {
         success: true,
@@ -34,13 +46,17 @@ export const AuthProvider = ({ children }) => {
       return {
         success: false,
         message:
-          error.response?.data?.message || "Registration failed",
+          error.response?.data?.message ||
+          "Registration failed",
       };
     }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    setUser(null);
     setIsAuthenticated(false);
   };
 
@@ -48,6 +64,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         isAuthenticated,
+        user,
         login,
         register,
         logout,
