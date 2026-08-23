@@ -62,3 +62,28 @@ describe("POST /api/vehicles", () => {
     });
 
 });
+describe("GET /api/vehicles", () => {
+
+    test("should get all vehicles as an authenticated user", async () => {
+
+        const token = jwt.sign(
+            {
+                id: new mongoose.Types.ObjectId(),
+                role: "user"
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h"
+            }
+        );
+
+        const response = await request(app)
+            .get("/api/vehicles")
+            .set("Authorization", `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(Array.isArray(response.body)).toBe(true);
+
+    });
+
+});

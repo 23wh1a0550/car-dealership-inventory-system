@@ -1,7 +1,8 @@
 const express = require("express");
 
 const {
-    createVehicle
+    createVehicle,
+    getVehicles
 } = require("../controllers/vehicleController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -14,6 +15,12 @@ router.post(
     authMiddleware,
     adminMiddleware,
     createVehicle
+);
+
+router.get(
+    "/",
+    authMiddleware,
+    getVehicles
 );
 
 module.exports = router;
