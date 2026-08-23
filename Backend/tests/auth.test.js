@@ -72,3 +72,45 @@ describe("POST /api/auth/login", () => {
     });
 
 });
+test("should reject login with incorrect password", async () => {
+
+    const response = await request(app)
+        .post("/api/auth/login")
+        .send({
+            email: "test@example.com",
+            password: "wrongpassword"
+        });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe("Invalid email or password");
+
+});
+
+
+test("should reject login with unknown email", async () => {
+
+    const response = await request(app)
+        .post("/api/auth/login")
+        .send({
+            email: "unknown@example.com",
+            password: "password123"
+        });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe("Invalid email or password");
+
+});
+
+
+test("should reject login when email or password is missing", async () => {
+
+    const response = await request(app)
+        .post("/api/auth/login")
+        .send({
+            email: "test@example.com"
+        });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe("Email and password are required");
+
+});
