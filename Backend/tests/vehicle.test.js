@@ -124,3 +124,49 @@ describe("GET /api/vehicles/:id", () => {
     });
 
 });
+describe("PUT /api/vehicles/:id", () => {
+
+    test("should update a vehicle as admin", async () => {
+
+        const token = jwt.sign(
+            {
+                id: new mongoose.Types.ObjectId(),
+                role: "admin"
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h"
+            }
+        );
+
+        const vehicle = await Vehicle.create({
+            make: "Ford",
+            model: "Focus",
+            category: "Hatchback",
+            price: 22000,
+            quantity: 2
+        });
+
+        const response = await request(app)
+            .put(`/api/vehicles/${vehicle._id}`)
+            .set("Authorization", `Bearer ${token}`)
+            .send({
+                make: "Ford",
+                model: "Mustang",
+                category: "Sports",
+                price: 35000,
+                quantity: 4
+            });
+
+        expect(response.statusCode).toBe(200);
+
+        expect(response.body).toHaveProperty("make", "Ford");
+        expect(response.body).toHaveProperty("model", "Mustang");
+        expect(response.body).toHaveProperty("category", "Sports");
+        expect(response.body).toHaveProperty("price", 35000);
+        expect(response.body).toHaveProperty("quantity", 4);
+
+        await Vehicle.findByIdAndDelete(vehicle._id);
+    });
+
+});

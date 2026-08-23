@@ -59,8 +59,35 @@ const getVehicleById = async (req, res) => {
         });
     }
 };
+const updateVehicle = async (req, res) => {
+    try {
+        const vehicle = await Vehicle.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+
+        if (!vehicle) {
+            return res.status(404).json({
+                message: "Vehicle not found"
+            });
+        }
+
+        res.status(200).json(vehicle);
+
+    } catch (error) {
+        res.status(500).json({
+            message: "Server error",
+            error: error.message
+        });
+    }
+};
 module.exports = {
     createVehicle,
     getVehicles,
-    getVehicleById
+    getVehicleById,
+    updateVehicle
 };
