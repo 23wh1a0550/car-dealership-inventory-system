@@ -87,3 +87,40 @@ describe("GET /api/vehicles", () => {
     });
 
 });
+describe("GET /api/vehicles/:id", () => {
+
+    test("should get a vehicle by ID", async () => {
+
+        const token = jwt.sign(
+            {
+                id: new mongoose.Types.ObjectId(),
+                role: "user"
+            },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h"
+            }
+        );
+
+        // Create a vehicle first
+        const vehicle = await Vehicle.create({
+            make: "Honda",
+            model: "Civic",
+            category: "Sedan",
+            price: 25000,
+            quantity: 3
+        });
+
+        const response = await request(app)
+            .get(`/api/vehicles/${vehicle._id}`)
+            .set("Authorization", `Bearer ${token}`);
+
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toHaveProperty("make", "Honda");
+        expect(response.body).toHaveProperty("model", "Civic");
+        expect(response.body).toHaveProperty("category", "Sedan");
+
+        await Vehicle.findByIdAndDelete(vehicle._id);
+    });
+
+});
