@@ -339,3 +339,18 @@ th {
     gap: 15px;
   }
 }
+.delete-btn {
+  border: none;
+  background: #ef4444;
+  color: white;
+
+  padding: 7px 12px;
+
+  border-radius: 5px;
+
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
